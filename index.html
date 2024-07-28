@@ -1,235 +1,264 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investment Profile App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .card {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .button {
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    class App extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          investmentType: null,
+          answers: {},
+          currentStep: 0,
+          showResults: false
+        };
+      }
 
-const InvestmentType = {
-  INCOME: 'income',
-  FLIP: 'flip',
-  RESIDENTIAL: 'residential'
-};
+      handleTypeSelection = (type) => {
+        this.setState({ investmentType: type, answers: {}, currentStep: 1, showResults: false });
+      }
 
-const App = () => {
-  const [investmentType, setInvestmentType] = useState(null);
-  const [answers, setAnswers] = useState({});
-  const [currentStep, setCurrentStep] = useState(0);
-  const [showResults, setShowResults] = useState(false);
+      handleInputChange = (e) => {
+        const { name, value } = e.target;
+        this.setState(prevState => ({ answers: { ...prevState.answers, [name]: value } }));
+      }
 
-  const handleTypeSelection = (type) => {
-    setInvestmentType(type);
-    setAnswers({});
-    setCurrentStep(1);
-    setShowResults(false);
-  };
+      handleSelectChange = (name, value) => {
+        this.setState(prevState => ({ answers: { ...prevState.answers, [name]: value } }));
+      }
 
-  const handleInputChange = (e) => {
-    setAnswers({ ...answers, [e.target.name]: e.target.value });
-  };
+      handleCheckboxChange = (name, checked) => {
+        this.setState(prevState => ({ answers: { ...prevState.answers, [name]: checked } }));
+      }
 
-  const handleSelectChange = (name, value) => {
-    setAnswers({ ...answers, [name]: value });
-  };
+      handleNextStep = () => {
+        this.setState(prevState => ({ currentStep: prevState.currentStep + 1 }));
+      }
 
-  const handleCheckboxChange = (name, checked) => {
-    setAnswers({ ...answers, [name]: checked });
-  };
+      handlePrevStep = () => {
+        this.setState(prevState => ({ currentStep: prevState.currentStep - 1 }));
+      }
 
-  const handleNextStep = () => {
-    setCurrentStep(currentStep + 1);
-  };
+      handleSubmit = (e) => {
+        e.preventDefault();
+        this.setState({ showResults: true });
+      }
 
-  const handlePrevStep = () => {
-    setCurrentStep(currentStep - 1);
-  };
+      renderQuestions = () => {
+        const { investmentType, currentStep } = this.state;
+        const questions = {
+          income: [
+            { name: 'investment', label: 'סכום השקעה', type: 'number', placeholder: 'הכנס סכום השקעה' },
+            { name: 'area', label: 'אזור גיאוגרפי', type: 'select', options: ['צפון', 'מרכז', 'דרום', 'ירושלים והסביבה'] },
+            { name: 'yield', label: 'תשואה שנתית מינימלית', type: 'number', placeholder: 'הכנס אחוז תשואה' },
+            { name: 'propertyType', label: 'סוג נכס מניב', type: 'multiSelect', options: ['דירות להשכרה', 'משרדים', 'חנויות', 'מחסנים', 'תעשייה'] },
+            { name: 'experience', label: 'האם יש לך ניסיון קודם בהשקעות נדל"ן?', type: 'select', options: ['כן', 'לא'] },
+            { name: 'management', label: 'ניהול הנכס', type: 'select', options: ['עצמי', 'שירותי ניהול', 'לא בטוח'] },
+            { name: 'investmentTerm', label: 'טווח זמן השקעה', type: 'select', options: ['קצר טווח: 1-3 שנים', 'בינוני: 3-7 שנים', 'ארוך טווח: 7+ שנים'] },
+          ],
+          flip: [
+            { name: 'budget', label: 'תקציב לרכישה ושיפוץ', type: 'number', placeholder: 'הכנס תקציב כולל' },
+            { name: 'area', label: 'אזור גיאוגרפי', type: 'select', options: ['צפון', 'מרכז', 'דרום', 'ירושלים והסביבה'] },
+            { name: 'renovationScope', label: 'היקף שיפוץ', type: 'select', options: ['קל', 'בינוני', 'מקיף'] },
+            { name: 'experience', label: 'האם יש לך ניסיון קודם בשיפוץ נכסים?', type: 'select', options: ['כן', 'לא'] },
+            { name: 'projectDuration', label: 'משך זמן הפרויקט', type: 'select', options: ['עד 3 חודשים', '3-6 חודשים', '6-12 חודשים', 'יותר משנה'] },
+            { name: 'workMethod', label: 'שיטת עבודה', type: 'select', options: ['קבלן', 'עצמי', 'שילוב'] },
+            { name: 'expectedProfit', label: 'רווח מינימלי מצופה', type: 'number', placeholder: 'הכנס אחוז רווח' },
+          ],
+          residential: [
+            { name: 'budget', label: 'תקציב לרכישת דירה', type: 'number', placeholder: 'הכנס תקציב' },
+            { name: 'area', label: 'אזור מבוקש', type: 'multiSelect', options: ['תל אביב', 'ירושלים', 'חיפה', 'באר שבע', 'רמת גן', 'הרצליה'] },
+            { name: 'rooms', label: 'מספר חדרים', type: 'select', options: ['סטודיו', '2', '3', '4', '5+'] },
+            { name: 'propertyType', label: 'סוג דירה', type: 'select', options: ['חדשה מקבלן', 'יד שנייה', 'לא משנה'] },
+            { name: 'features', label: 'מאפיינים חשובים', type: 'multiSelect', options: ['מרפסת', 'חנייה', 'מחסן', 'מעלית', 'קומה גבוהה', 'גינה'] },
+            { name: 'minSize', label: 'גודל דירה מינימלי', type: 'number', placeholder: 'הכנס גודל במ"ר' },
+            { name: 'buildingStyle', label: 'סגנון בנייה מועדף', type: 'select', options: ['בנייה רוויה', 'בית פרטי', 'דו-משפחתי', 'פנטהאוז'] },
+            { name: 'renovationLevel', label: 'רמת שיפוץ', type: 'select', options: ['ללא שיפוץ', 'שיפוץ קל', 'שיפוץ מקיף'] },
+          ],
+        };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setShowResults(true);
-  };
+        const currentQuestions = questions[investmentType];
+        const questionsPerStep = 3;
+        const startIndex = (currentStep - 1) * questionsPerStep;
+        const endIndex = startIndex + questionsPerStep;
+        const currentQuestionSet = currentQuestions.slice(startIndex, endIndex);
 
-  const renderQuestions = () => {
-    const questions = {
-      [InvestmentType.INCOME]: [
-        { name: 'investment', label: 'סכום השקעה', type: 'number', placeholder: 'הכנס סכום השקעה' },
-        { name: 'area', label: 'אזור גיאוגרפי', type: 'select', options: ['צפון', 'מרכז', 'דרום', 'ירושלים והסביבה'] },
-        { name: 'yield', label: 'תשואה שנתית מינימלית', type: 'number', placeholder: 'הכנס אחוז תשואה' },
-        { name: 'propertyType', label: 'סוג נכס מניב', type: 'multiSelect', options: ['דירות להשכרה', 'משרדים', 'חנויות', 'מחסנים', 'תעשייה'] },
-        { name: 'experience', label: 'האם יש לך ניסיון קודם בהשקעות נדל"ן?', type: 'select', options: ['כן', 'לא'] },
-        { name: 'management', label: 'ניהול הנכס', type: 'select', options: ['עצמי', 'שירותי ניהול', 'לא בטוח'] },
-        { name: 'investmentTerm', label: 'טווח זמן השקעה', type: 'select', options: ['קצר טווח: 1-3 שנים', 'בינוני: 3-7 שנים', 'ארוך טווח: 7+ שנים'] },
-      ],
-      [InvestmentType.FLIP]: [
-        { name: 'budget', label: 'תקציב לרכישה ושיפוץ', type: 'number', placeholder: 'הכנס תקציב כולל' },
-        { name: 'area', label: 'אזור גיאוגרפי', type: 'select', options: ['צפון', 'מרכז', 'דרום', 'ירושלים והסביבה'] },
-        { name: 'renovationScope', label: 'היקף שיפוץ', type: 'select', options: ['קל', 'בינוני', 'מקיף'] },
-        { name: 'experience', label: 'האם יש לך ניסיון קודם בשיפוץ נכסים?', type: 'select', options: ['כן', 'לא'] },
-        { name: 'projectDuration', label: 'משך זמן הפרויקט', type: 'select', options: ['עד 3 חודשים', '3-6 חודשים', '6-12 חודשים', 'יותר משנה'] },
-        { name: 'workMethod', label: 'שיטת עבודה', type: 'select', options: ['קבלן', 'עצמי', 'שילוב'] },
-        { name: 'expectedProfit', label: 'רווח מינימלי מצופה', type: 'number', placeholder: 'הכנס אחוז רווח' },
-      ],
-      [InvestmentType.RESIDENTIAL]: [
-        { name: 'budget', label: 'תקציב לרכישת דירה', type: 'number', placeholder: 'הכנס תקציב' },
-        { name: 'area', label: 'אזור מבוקש', type: 'multiSelect', options: ['תל אביב', 'ירושלים', 'חיפה', 'באר שבע', 'רמת גן', 'הרצליה'] },
-        { name: 'rooms', label: 'מספר חדרים', type: 'select', options: ['סטודיו', '2', '3', '4', '5+'] },
-        { name: 'propertyType', label: 'סוג דירה', type: 'select', options: ['חדשה מקבלן', 'יד שנייה', 'לא משנה'] },
-        { name: 'features', label: 'מאפיינים חשובים', type: 'multiSelect', options: ['מרפסת', 'חנייה', 'מחסן', 'מעלית', 'קומה גבוהה', 'גינה'] },
-        { name: 'minSize', label: 'גודל דירה מינימלי', type: 'number', placeholder: 'הכנס גודל במ"ר' },
-        { name: 'buildingStyle', label: 'סגנון בנייה מועדף', type: 'select', options: ['בנייה רוויה', 'בית פרטי', 'דו-משפחתי', 'פנטהאוז'] },
-        { name: 'renovationLevel', label: 'רמת שיפוץ', type: 'select', options: ['ללא שיפוץ', 'שיפוץ קל', 'שיפוץ מקיף'] },
-      ],
-    };
-
-    const currentQuestions = questions[investmentType];
-    const questionsPerStep = 3;
-    const startIndex = (currentStep - 1) * questionsPerStep;
-    const endIndex = startIndex + questionsPerStep;
-    const currentQuestionSet = currentQuestions.slice(startIndex, endIndex);
-
-    return (
-      <>
-        {currentQuestionSet.map((question, index) => (
-          <div key={index} className="mb-4">
-            <Label>{question.label}</Label>
-            {question.type === 'select' && (
-              <Select name={question.name} onValueChange={(value) => handleSelectChange(question.name, value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={`בחר ${question.label}`} />
-                </SelectTrigger>
-                <SelectContent>
-                  {question.options.map((option, optionIndex) => (
-                    <SelectItem key={optionIndex} value={option}>{option}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            {question.type === 'multiSelect' && (
-              <div className="space-y-2">
-                {question.options.map((option, optionIndex) => (
-                  <div key={optionIndex} className="flex items-center">
-                    <Checkbox
-                      id={`${question.name}-${optionIndex}`}
-                      onCheckedChange={(checked) => handleCheckboxChange(`${question.name}-${option}`, checked)}
-                    />
-                    <Label htmlFor={`${question.name}-${optionIndex}`} className="ml-2">{option}</Label>
+        return (
+          <>
+            {currentQuestionSet.map((question, index) => (
+              <div key={index} className="mb-4">
+                <label>{question.label}</label>
+                {question.type === 'select' && (
+                  <select name={question.name} onChange={(e) => this.handleSelectChange(question.name, e.target.value)}>
+                    <option value="">{`בחר ${question.label}`}</option>
+                    {question.options.map((option, optionIndex) => (
+                      <option key={optionIndex} value={option}>{option}</option>
+                    ))}
+                  </select>
+                )}
+                {question.type === 'multiSelect' && (
+                  <div className="space-y-2">
+                    {question.options.map((option, optionIndex) => (
+                      <div key={optionIndex} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`${question.name}-${optionIndex}`}
+                          onChange={(e) => this.handleCheckboxChange(`${question.name}-${option}`, e.target.checked)}
+                        />
+                        <label htmlFor={`${question.name}-${optionIndex}`} className="ml-2">{option}</label>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-            {question.type === 'number' && (
-              <Input
-                name={question.name}
-                type="number"
-                placeholder={question.placeholder}
-                onChange={handleInputChange}
-              />
-            )}
-          </div>
-        ))}
-      </>
-    );
-  };
-
-  const renderResults = () => {
-    const demoProperties = {
-      [InvestmentType.INCOME]: [
-        { address: "רחוב הרצל 10, תל אביב", price: 2000000, rooms: 3, size: 80, yield: '5%', propertyType: 'דירות להשכרה', management: 'שירותי ניהול' },
-        { address: "רחוב ויצמן 15, חיפה", price: 1500000, rooms: 2, size: 60, yield: '4%', propertyType: 'משרדים', management: 'עצמי' },
-        { address: "רחוב בן יהודה 20, ירושלים", price: 2800000, rooms: 4, size: 100, yield: '6%', propertyType: 'חנויות', management: 'לא בטוח' }
-      ],
-      [InvestmentType.FLIP]: [
-        { address: "רחוב הרצל 5, תל אביב", price: 3000000, rooms: 4, size: 110, renovationBudget: 500000, renovationScope: 'מקיף', projectDuration: '6 חודשים', workMethod: 'קבלן', expectedProfit: '10%' },
-        { address: "רחוב ירושלים 10, פתח תקווה", price: 2000000, rooms: 3, size: 90, renovationBudget: 300000, renovationScope: 'בינוני', projectDuration: '3 חודשים', workMethod: 'עצמי', expectedProfit: '8%' },
-        { address: "רחוב הגפן 7, חיפה", price: 1500000, rooms: 2, size: 70, renovationBudget: 200000, renovationScope: 'קל', projectDuration: '2 חודשים', workMethod: 'שילוב', expectedProfit: '6%' }
-      ],
-      [InvestmentType.RESIDENTIAL]: [
-        { address: "רחוב הנשיא 25, תל אביב", price: 4000000, rooms: 5, size: 130, propertyType: 'חדשה מקבלן', features: ['מרפסת', 'חנייה', 'מחסן', 'מעלית'], buildingStyle: 'פנטהאוז', renovationLevel: 'ללא שיפוץ' },
-        { address: "רחוב דוד 18, ירושלים", price: 3200000, rooms: 4, size: 120, propertyType: 'יד שנייה', features: ['גינה', 'חנייה', 'קומה גבוהה'], buildingStyle: 'בית פרטי', renovationLevel: 'שיפוץ קל' },
-        { address: "רחוב הרצל 10, חיפה", price: 2500000, rooms: 3, size: 100, propertyType: 'לא משנה', features: ['מרפסת', 'מעלית', 'קומה גבוהה'], buildingStyle: 'בנייה רוויה', renovationLevel: 'שיפוץ מקיף' }
-      ]
-    };
-
-    const propertiesToShow = demoProperties[investmentType];
-
-    return (
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold">נכסים מומלצים עבורך:</h2>
-        {propertiesToShow.map((property, index) => (
-          <Card key={index}>
-            <CardHeader>
-              <CardTitle>{property.address}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>מחיר: ₪{property.price.toLocaleString()}</p>
-              <p>חדרים: {property.rooms}</p>
-              <p>גודל: {property.size} מ"ר</p>
-              {property.yield && <p>תשואה: {property.yield}</p>}
-              {property.propertyType && <p>סוג נכס: {property.propertyType}</p>}
-              {property.management && <p>ניהול: {property.management}</p>}
-              {property.renovationBudget && <p>תקציב שיפוץ: ₪{property.renovationBudget.toLocaleString()}</p>}
-              {property.renovationScope && <p>היקף שיפוץ: {property.renovationScope}</p>}
-              {property.projectDuration && <p>משך פרויקט: {property.projectDuration}</p>}
-              {property.workMethod && <p>שיטת עבודה: {property.workMethod}</p>}
-              {property.expectedProfit && <p>רווח מינימלי מצופה: {property.expectedProfit}</p>}
-              {property.features && <p>מאפיינים: {property.features.join(', ')}</p>}
-              {property.buildingStyle && <p>סגנון בנייה: {property.buildingStyle}</p>}
-              {property.renovationLevel && <p>רמת שיפוץ: {property.renovationLevel}</p>}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  };
-
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-8 text-center">בנה את פרופיל המשקיע שלך</h1>
-      
-      {!investmentType && (
-        <>
-          <p className="text-center mb-6">בחר את סוג ההשקעה המתאים לך ונתאים עבורך את הנכסים הטובים ביותר</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button onClick={() => handleTypeSelection(InvestmentType.INCOME)}>נדל"ן מניב</Button>
-            <Button onClick={() => handleTypeSelection(InvestmentType.FLIP)}>פליפ (שיפוץ ומכירה)</Button>
-            <Button onClick={() => handleTypeSelection(InvestmentType.RESIDENTIAL)}>מגורים</Button>
-          </div>
-        </>
-      )}
-
-      {investmentType && !showResults && (
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי השקעה - שלב {currentStep} מתוך 3</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Progress value={currentStep * 33.33} className="mb-4" />
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {renderQuestions()}
-              <div className="flex justify-between">
-                {currentStep > 1 && (
-                  <Button type="button" onClick={handlePrevStep}>הקודם</Button>
                 )}
-                {currentStep < 3 ? (
-                  <Button type="button" onClick={handleNextStep}>הבא</Button>
-                ) : (
-                  <Button type="submit">הצג תוצאות מותאמות אישית</Button>
+                {question.type === 'number' && (
+                  <input
+                    name={question.name}
+                    type="number"
+                    placeholder={question.placeholder}
+                    onChange={this.handleInputChange}
+                  />
                 )}
               </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+            ))}
+          </>
+        );
+      }
 
-      {showResults && renderResults()}
+      renderResults = () => {
+        const { investmentType } = this.state;
+        const demoProperties = {
+          income: [
+            { address: "רחוב הרצל 10, תל אביב", price: 2000000, rooms: 3, size: 80, yield: '5%', propertyType: 'דירות להשכרה', management: 'שירותי ניהול' },
+            { address: "רחוב ויצמן 15, חיפה", price: 1500000, rooms: 2, size: 60, yield: '4%', propertyType: 'משרדים', management: 'עצמי' },
+            { address: "רחוב בן יהודה 20, ירושלים", price: 2800000, rooms: 4, size: 100, yield: '6%', propertyType: 'חנויות', management: 'לא בטוח' }
+          ],
+          flip: [
+            { address: "רחוב הרצל 5, תל אביב", price: 3000000, rooms: 4, size: 110, renovationBudget: 500000, renovationScope: 'מקיף', projectDuration: '6 חודשים', workMethod: 'קבלן', expectedProfit: '10%' },
+            { address: "רחוב ירושלים 10, פתח תקווה", price: 2000000, rooms: 3, size: 90, renovationBudget: 300000, renovationScope: 'בינוני', projectDuration: '3 חודשים', workMethod: 'עצמי', expectedProfit: '8%' },
+            { address: "רחוב הגפן 7, חיפה", price: 1500000, rooms: 2, size: 70, renovationBudget: 200000, renovationScope: 'קל', projectDuration: '2 חודשים', workMethod: 'שילוב', expectedProfit: '6%' }
+          ],
+          residential: [
+            { address: "רחוב הנשיא 25, תל אביב", price: 4000000, rooms: 5, size: 130, propertyType: 'חדשה מקבלן', features: ['מרפסת', 'חנייה', 'מחסן', 'מעלית'], buildingStyle: 'פנטהאוז', renovationLevel: 'ללא שיפוץ' },
+            { address: "רחוב דוד 18, ירושלים", price: 3200000, rooms: 4, size: 120, propertyType: 'יד שנייה', features: ['גינה', 'חנייה', 'קומה גבוהה'], buildingStyle: 'בית פרטי', renovationLevel: 'שיפוץ קל' },
+            { address: "רחוב הרצל 10, חיפה", price: 2500000, rooms: 3, size: 100, propertyType: 'לא משנה', features: ['מרפסת', 'מעלית', 'קומה גבוהה'], buildingStyle: 'בנייה רוויה', renovationLevel: 'שיפוץ מקיף' }
+          ]
+        };
 
-      <div className="mt-8">
-        <Button onClick={() => setInvestmentType(null)}>שנה סוג השקעה</Button>
-      </div>
-    </div>
-  );
-};
+        const propertiesToShow = demoProperties[investmentType];
 
-export default App;
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold">נכסים מומלצים עבורך:</h2>
+            {propertiesToShow.map((property, index) => (
+              <div key={index} className="card">
+                <h3>{property.address}</h3>
+                <p>מחיר: ₪{property.price.toLocaleString()}</p>
+                <p>חדרים: {property.rooms}</p>
+                <p>גודל: {property.size} מ"ר</p>
+                {property.yield && <p>תשואה: {property.yield}</p>}
+                {property.propertyType && <p>סוג נכס: {property.propertyType}</p>}
+                {property.management && <p>ניהול: {property.management}</p>}
+                {property.renovationBudget && <p>תקציב שיפוץ: ₪{property.renovationBudget.toLocaleString()}</p>}
+                {property.renovationScope && <p>היקף שיפוץ: {property.renovationScope}</p>}
+                {property.projectDuration && <p>משך פרויקט: {property.projectDuration}</p>}
+                {property.workMethod && <p>שיטת עבודה: {property.workMethod}</p>}
+                {property.expectedProfit && <p>רווח מינימלי מצופה: {property.expectedProfit}</p>}
+                {property.features && <p>מאפיינים: {property.features.join(', ')}</p>}
+                {property.buildingStyle && <p>סגנון בנייה: {property.buildingStyle}</p>}
+                {property.renovationLevel && <p>רמת שיפוץ: {property.renovationLevel}</p>}
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      render() {
+        const { investmentType, currentStep, showResults } = this.state;
+
+        return (
+          <div className="container">
+            <h1 className="text-3xl font-bold mb-8 text-center">בנה את פרופיל המשקיע שלך</h1>
+            
+            {!investmentType && (
+              <>
+                <p className="text-center mb-6">בחר את סוג ההשקעה המתאים לך ונתאים עבורך את הנכסים הטובים ביותר</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <button className="button" onClick={() => this.handleTypeSelection('income')}>נדל"ן מניב</button>
+                  <button className="button" onClick={() => this.handleTypeSelection('flip')}>פליפ (שיפוץ ומכירה)</button>
+                  <button className="button" onClick={() => this.handleTypeSelection('residential')}>מגורים</button>
+                </div>
+              </>
+            )}
+
+            {investmentType && !showResults && (
+              <div className="card">
+                <h3>פרטי השקעה - שלב {currentStep} מתוך 3</h3>
+                <div className="mb-4">
+                  <progress value={currentStep * 33.33} max="100" />
+                </div>
+                <form onSubmit={this.handleSubmit} className="space-y-4">
+                  {this.renderQuestions()}
+                  <div className="flex justify-between">
+                    {currentStep > 1 && (
+                      <button className="button" type="button" onClick={this.handlePrevStep}>הקודם</button>
+                    )}
+                    {currentStep < 3 ? (
+                      <button className="button" type="button" onClick={this.handleNextStep}>הבא</button>
+                    ) : (
+                      <button className="button" type="submit">הצג תוצאות מותאמות אישית</button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {showResults && this.renderResults()}
+
+            <div className="mt-8">
+              <button className="button" onClick={() => this.setState({ investmentType: null })}>שנה סוג השקעה</button>
+            </div>
+          </div>
+        );
+      }
+    }
+
+    const rootElement = document.getElementById('root');
+    ReactDOM.render(<App />, rootElement);
+  </script>
+  <!-- React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+</body>
+</html>
